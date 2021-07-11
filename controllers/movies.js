@@ -56,23 +56,45 @@ module.exports.deleteMovie = (req, res, next) => {
   Movie.findById(req.params.movieId)
     .orFail(new NotFoundError('Фильм не найден'))
     .then((movie) => {
-      if (movie.owner.toString() === req.user._id) {
-        Movie.findByIdAndRemove(req.params.movieId)
-          .then((data) => {
-            res.send({ data });
-          });
-      } else {
-        throw new ForbiddenError('У вас нет прав для удаления этого фильма');
+      if (movie.owner.toString() !== req.user._id) {
+        return next(new ForbiddenError('У вас нет прав для удаления этого фильма'));
       }
+      return Movie.findByIdAndRemove(req.params.movieId)
+        .then((data) => {
+          res.send({ data });
+        });
     })
     .catch((err) => {
-      if (err.name === 'CastError') {
+      if (err.kind === 'ObjectId') {
         throw new NotFoundObjectError('Фильм с указанным id не найден');
-      } else if (err.name === 'Error') {
-        throw new ForbiddenError('У вас нет прав для удаления этого фильма');
       } else {
         throw new GlobalErrServer('Произошла ошибка');
       }
     })
     .catch(next);
 };
+
+// module.exports.deleteMovie = (req, res, next) => {
+//   Movie.findById(req.params.movieId)
+//     .orFail(new NotFoundError('Фильм не найден'))
+//     .then((movie) => {
+//       if (movie.owner.toString() === req.user._id) {
+//         Movie.findByIdAndRemove(req.params.movieId)
+//           .then((data) => {
+//             res.send({ data });
+//           });
+//       } else {
+//         throw new ForbiddenError('У вас нет прав для удаления этого фильма');
+//       }
+//     })
+//     .catch((err) => {
+//       if (err.name === 'CastError') {
+//         throw new NotFoundObjectError('Фильм с указанным id не найден');
+//       } else if (err.name === 'Error') {
+//         throw new ForbiddenError('У вас нет прав для удаления этого фильма');
+//       } else {
+//         throw new GlobalErrServer('Произошла ошибка');
+//       }
+//     })
+//     .catch(next);
+// };

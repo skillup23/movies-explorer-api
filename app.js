@@ -7,9 +7,9 @@ const helmet = require('helmet');
 const { limiter } = require('./middlewares/limiter');
 const routes = require('./routes/index');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
-const NotFoundError = require('./errors/not-found-err');
+const { MONGO_URL } = require('./config');
 
-mongoose.connect('mongodb://localhost:27017/bitfilmsdb', {
+mongoose.connect(MONGO_URL, {
   useNewUrlParser: true,
   useCreateIndex: true,
   useFindAndModify: false,
@@ -23,10 +23,10 @@ const { PORT = 3000 } = process.env;
 // загружаем в ноду .env
 require('dotenv').config();
 
-app.use(bodyParser.json());
-
 // логгер запросов
 app.use(requestLogger);
+
+app.use(bodyParser.json());
 
 app.use(cors());
 
@@ -54,9 +54,6 @@ app.use(helmet());
 
 // роуты сервера
 app.use(routes);
-app.use('*', () => {
-  throw new NotFoundError('Такой страницы не существует!');
-});
 
 // логгер ошибок
 app.use(errorLogger);

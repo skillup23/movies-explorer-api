@@ -6,6 +6,7 @@ const NotFoundObjectError = require('../errors/not-found-object-err');
 const NotFoundError = require('../errors/not-found-err');
 const GlobalErrServer = require('../errors/not-found-err');
 const ExsistMailErr = require('../errors/exsist-mail-err');
+const AuthorizationErr = require('../errors/authorization-err');
 
 module.exports.getUserInfo = (req, res, next) => {
   User.find({ _id: req.user._id })
@@ -79,7 +80,7 @@ module.exports.createUser = (req, res, next) => {
     .catch(next);
 };
 
-module.exports.login = (req, res) => {
+module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
 
   return User.findUserByCredentials(email, password)
@@ -93,8 +94,10 @@ module.exports.login = (req, res) => {
 
       res.send({ token });
     })
-    .catch((err) => {
-      res
-        .status(401).send({ message: err.message });
-    });
+    .catch(() => {
+      // res
+      //   .status(401).send({ message: err.message });
+      throw new AuthorizationErr('Переданы некорректные данные при авторизации пользователя');
+    })
+    .catch(next);
 };
