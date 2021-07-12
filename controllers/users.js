@@ -43,6 +43,8 @@ module.exports.updateUser = (req, res, next) => {
         throw new NotFoundObjectError('Нет пользователя с таким id');
       } else if (err.message === 'NotFound') {
         throw new NotFoundError('Ресурс не найден');
+      } else if (err.name === 'MongoError' && err.code === 11000) {
+        throw new ExsistMailErr('Пользователь с таким email уже зарегестрирован');
       } else {
         throw new GlobalErrServer('Произошла ошибка');
       }
@@ -87,7 +89,6 @@ module.exports.login = (req, res, next) => {
     .then((user) => {
       const token = jwt.sign(
         { _id: user._id },
-        // 'some-secret-key',
         NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret',
         { expiresIn: '7d' },
       );
@@ -95,8 +96,6 @@ module.exports.login = (req, res, next) => {
       res.send({ token });
     })
     .catch(() => {
-      // res
-      //   .status(401).send({ message: err.message });
       throw new AuthorizationErr('Переданы некорректные данные при авторизации пользователя');
     })
     .catch(next);

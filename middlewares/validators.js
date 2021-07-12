@@ -1,4 +1,5 @@
 const { celebrate, Joi } = require('celebrate');
+const validator = require('validator');
 
 const validateCreateUser = celebrate({
   body: Joi.object().keys({
@@ -57,12 +58,28 @@ const validatecreateMovie = celebrate({
     duration: Joi.number().required(),
     year: Joi.string().required(),
     description: Joi.string().required(),
-    image: Joi.string().required(),
-    trailer: Joi.string().required(),
-    thumbnail: Joi.string().required(),
+    image: Joi.string().required().custom((value, helpers) => {
+      if (validator.isURL(value)) {
+        return value;
+      }
+      return helpers.message('Поле trailer должно быть корректным')
+    }),
+    trailer: Joi.string().required().custom((value, helpers) => {
+      if (validator.isURL(value)) {
+        return value;
+      }
+      return helpers.message('Поле trailer должно быть корректным')
+    }),
+    thumbnail: Joi.string().required().custom((value, helpers) => {
+      if (validator.isURL(value)) {
+        return value;
+      }
+      return helpers.message('Поле trailer должно быть корректным')
+    }),
+    movieId: Joi.number(),
     nameRU: Joi.string().required(),
     nameEN: Joi.string().required(),
-  }).unknown(true),
+  }),
 });
 
 module.exports = {
