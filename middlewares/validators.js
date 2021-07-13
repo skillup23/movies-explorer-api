@@ -62,23 +62,30 @@ const validatecreateMovie = celebrate({
       if (validator.isURL(value)) {
         return value;
       }
-      return helpers.message('Поле trailer должно быть корректным')
+      return helpers.message('Поле trailer должно быть корректным');
     }),
     trailer: Joi.string().required().custom((value, helpers) => {
       if (validator.isURL(value)) {
         return value;
       }
-      return helpers.message('Поле trailer должно быть корректным')
+      return helpers.message('Поле trailer должно быть корректным');
     }),
     thumbnail: Joi.string().required().custom((value, helpers) => {
       if (validator.isURL(value)) {
         return value;
       }
-      return helpers.message('Поле trailer должно быть корректным')
+      return helpers.message('Поле trailer должно быть корректным');
     }),
-    movieId: Joi.number(),
+    movieId: Joi.number().required(),
     nameRU: Joi.string().required(),
     nameEN: Joi.string().required(),
+  }),
+});
+
+const validatedeleteMovie = celebrate({
+  body: Joi.object().keys({
+    movieId: Joi.string().hex().length(24)
+      .message('id фильма должен быть корректным'),
   }),
 });
 
@@ -87,4 +94,5 @@ module.exports = {
   validateLogin,
   validateUserUpdate,
   validatecreateMovie,
+  validatedeleteMovie,
 };

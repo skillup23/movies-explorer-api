@@ -1,7 +1,7 @@
 const Movie = require('../models/movies');
-const NotFoundObjectError = require('../errors/not-found-object-err');
+const BadRequestError = require('../errors/not-found-object-err');
 const NotFoundError = require('../errors/not-found-err');
-const GlobalErrServer = require('../errors/not-found-err');
+const GlobalErrServer = require('../errors/global-err-server');
 const ForbiddenError = require('../errors/forbidden-error');
 
 module.exports.getAllSaveMovies = (req, res, next) => {
@@ -44,7 +44,7 @@ module.exports.createMovie = (req, res, next) => {
     .then((movie) => res.send(movie))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        throw new NotFoundObjectError('Переданы некорректные данные при создании фильма');
+        throw new BadRequestError('Переданы некорректные данные при создании фильма');
       } else {
         throw new GlobalErrServer('Произошла ошибка');
       }
@@ -66,9 +66,11 @@ module.exports.deleteMovie = (req, res, next) => {
     })
     .catch((err) => {
       if (err.kind === 'ObjectId') {
-        throw new NotFoundObjectError('Фильм с указанным id не найден');
+        throw new BadRequestError('Не валидный id фильма');
+      } else if (err.name === 'Error') {
+        throw new NotFoundError('Фильм с указанным id не найден');
       } else {
-        throw new GlobalErrServer('Произошла ошибка');
+        throw new GlobalErrServer(err);
       }
     })
     .catch(next);

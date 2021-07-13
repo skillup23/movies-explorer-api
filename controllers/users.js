@@ -2,10 +2,10 @@ const { NODE_ENV, JWT_SECRET } = process.env;
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/users');
-const NotFoundObjectError = require('../errors/not-found-object-err');
+const BadRequestError = require('../errors/not-found-object-err');
 const NotFoundError = require('../errors/not-found-err');
-const GlobalErrServer = require('../errors/not-found-err');
-const ExsistMailErr = require('../errors/exsist-mail-err');
+const GlobalErrServer = require('../errors/global-err-server');
+const ConflictError = require('../errors/exsist-mail-err');
 const AuthorizationErr = require('../errors/authorization-err');
 
 module.exports.getUserInfo = (req, res, next) => {
@@ -38,13 +38,13 @@ module.exports.updateUser = (req, res, next) => {
     .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        throw new NotFoundObjectError('Переданы некорректные данные при обновлении профиля');
+        throw new BadRequestError('Переданы некорректные данные при обновлении профиля');
       } else if (err.name === 'CastError') {
-        throw new NotFoundObjectError('Нет пользователя с таким id');
+        throw new BadRequestError('Нет пользователя с таким id');
       } else if (err.message === 'NotFound') {
         throw new NotFoundError('Ресурс не найден');
       } else if (err.name === 'MongoError' && err.code === 11000) {
-        throw new ExsistMailErr('Пользователь с таким email уже зарегестрирован');
+        throw new ConflictError('Пользователь с таким email уже зарегестрирован');
       } else {
         throw new GlobalErrServer('Произошла ошибка');
       }
@@ -72,9 +72,9 @@ module.exports.createUser = (req, res, next) => {
     }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        throw new NotFoundObjectError('Переданы некорректные данные при создании пользователя');
+        throw new BadRequestError('Переданы некорректные данные при создании пользователя');
       } else if (err.name === 'MongoError' && err.code === 11000) {
-        throw new ExsistMailErr('Пользователь с таким email уже зарегестрирован');
+        throw new ConflictError('Пользователь с таким email уже зарегестрирован');
       } else {
         throw new GlobalErrServer('Произошла ошибка');
       }
